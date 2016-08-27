@@ -2,9 +2,11 @@ many [regl](http://regl.party) experiments.
 
 ###to run:
 
-`npm install`
+clone this repository to your own computer.
 
-`budo index.js`
+run `npm install` in the repository directory.
+
+run `budo index.js`
 
 then point your browser to `localhost:9966`
 
@@ -19,7 +21,6 @@ in this section...
 var demos = [
   require('./cylwarp.js')(regl),
 ]
-
 ```
 
 ...change `cylwarp.js` to another file in the directory, like `jellyfish.js`.
