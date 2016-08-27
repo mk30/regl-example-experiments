@@ -3,10 +3,10 @@ const mat4 = require('gl-mat4')
 const vec3 = require('gl-vec3')
 var rmat = []
 
-const cyl = require('./implicitcyl.js')
+const cyl = require('./bits/implicitcyl.js')
 const normals = require('angle-normals')
 
-const camera = require('./camera.js')(regl, {
+const camera = require('./bits/camera.js')(regl, {
   center: [0, 2.5, 0]
 })
 module.exports = function (regl) {

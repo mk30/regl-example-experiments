@@ -2,10 +2,10 @@ const regl = require('../regl')()
 const mat4 = require('gl-mat4')
 var rmat = []
 
-const dis = require('./displacementmodule.js')
+const dis = require('./bits/displacementmodule.js')
 const normals = require('angle-normals')
 
-const camera = require('./camera')(regl, {
+const camera = require('./bits/camera')(regl, {
   center: [0, 2.5, 0]
 })
 

@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "angle-normals": "^1.0.0",
+    "budo": "^8.1.0",
     "gl-mat4": "^1.1.4",
     "gl-vec2": "^1.0.0",
     "gl-vec3": "^1.0.3",

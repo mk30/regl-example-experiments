@@ -27,3 +27,7 @@ var demos = [
 
 save and then do `budo index.js` again and refresh
 `localhost:9966`.
+
+note: the files in the `bits` directory are pieces of code
+that are used in the examples. these files won't run if you
+put them directly into `index.js`.

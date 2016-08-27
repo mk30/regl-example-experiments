@@ -1,8 +1,8 @@
 var regl = require('regl')()
 var demos = [ 
-  require('./cylwarp.js')(regl),
+  require('./wingpole.js')(regl),
 ]
-const camera = require('./camera.js')(regl, {
+const camera = require('./bits/camera.js')(regl, {
   center: [0, 0, 0]
 })
 
