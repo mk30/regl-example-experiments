@@ -1,6 +1,6 @@
 var regl = require('regl')()
 var demos = [ 
-  require('./wingpole.js')(regl),
+  require('./jellyfish.js')(regl),
 ]
 const camera = require('./bits/camera.js')(regl, {
   center: [0, 0, 0]

@@ -11,7 +11,7 @@ function sphere (y, z, x){
 var mesh = isosurface.surfaceNets([64,64,64],
   function (x, y, z){
     return sphere(x, y, z)+  
-    displacement(x,1/y,z)/(1/y)*10
+    displacement(x,1/y,z)/(1/y)*20
   }
   , [[-11,-11,-21], [11,21,11]])
 

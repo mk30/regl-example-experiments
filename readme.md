@@ -2,15 +2,19 @@ many [regl](http://regl.party) experiments.
 
 ###to run:
 
-clone this repository to your own computer.
+the below instructions are entered via command line (the
+"terminal"). you will need to have
+[node.js and npm](https://nodejs.org/en/download/)
+installed for this to work.
+
+
+first clone this repository to your own computer. 
 
 run `npm install` in the repository directory.
 
 run `budo index.js`
 
 then point your browser to `localhost:9966`
-
-the default example loaded is `cylwarp.js`.
 
 ###view other examples
 
@@ -19,11 +23,11 @@ in this section...
 
 ```
 var demos = [
-  require('./cylwarp.js')(regl),
+  require('./jellyfish.js')(regl),
 ]
 ```
 
-...change `cylwarp.js` to another file in the directory, like `jellyfish.js`.
+...change `jellyfish.js` to another file in the directory, like `cylwarp.js`.
 
 save and then do `budo index.js` again and refresh
 `localhost:9966`.
