@@ -6,6 +6,9 @@ var camera = require('regl-camera')(regl, {
 var anormals = require('angle-normals')
 var mat4 = require('gl-mat4')
 var spheremesh = require('sphere-mesh')
+var fs = require('fs')
+var snoise = fs.readFileSync(require.resolve('glsl-noise/simplex/3d.glsl'),'utf8')
+var cnoise = fs.readFileSync(require.resolve('glsl-curl-noise/curl.glsl'),'utf8')
 
 function makesphere (regl) {
   var sphere = spheremesh(20,0.25)
@@ -23,12 +26,15 @@ function makesphere (regl) {
     vert: `
       precision mediump float;
       uniform mat4 projection, view, model;
+      uniform float time;
       attribute vec3 position, normal;
       varying vec3 vnorm, vpos;
+      ${snoise}
       void main () {
         vnorm = normal;
-        vpos = position;
-        gl_Position = projection * view * model * vec4(position,1);
+        float dy = snoise(position+time*0.25);
+        vpos = position + vec3(0,dy,0);
+        gl_Position = projection * view * model * vec4(vpos,1);
       }
     `,
     attributes: {
@@ -38,7 +44,8 @@ function makesphere (regl) {
     uniforms: {
       model: function () {
         return mat4.identity(model)
-      }
+      },
+      time: regl.context('time')
     },
     elements: sphere.cells
   })
