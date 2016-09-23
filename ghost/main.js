@@ -21,7 +21,11 @@ function makesphere (regl) {
       ${cnoise}
       void main () {
         float c = snoise(curlNoise(vpos));
-        gl_FragColor = vec4(sqrt(vec3(1,0.8,0.5)*(c+1.0)),0.5);
+        if (vpos.x*vpos.x + vpos.y*vpos.y + vpos.z*vpos.z -
+        0.25 < 0.0){
+          gl_FragColor = vec4(sqrt(vec3(1,0.3,0.5)*(c-1.0)),0.8);
+        }
+        else gl_FragColor = vec4(sqrt(vec3(1,0.8,0.5)*(c+1.0)),0.5);
       }
     `,
     vert: `
@@ -61,6 +65,13 @@ function makesphere (regl) {
         return model
       },
       time: regl.context('time')
+    },
+    blend: {
+      enable: true,
+      func: {
+        src: 'src alpha',
+        dst: 'one minus src alpha'
+      }
     },
     elements: sphere.cells
   })
