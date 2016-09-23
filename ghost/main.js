@@ -37,12 +37,13 @@ function makesphere (regl) {
           pow(abs(((position.y/0.5)-1.0)*0.5),5.0),
           0.5
         );
-        float dx = snoise(2.0*position+sin(0.5*time-h))*h;
+        float dx =
+        snoise(position+sin(0.2*time-0.3*h))*h*1.5;
         float dy = snoise(position+vec3(0,0,sin(time*h/2.0)));
         float dz =
         snoise(3.0*position+cos(0.2*time-0.5*h))*h*1.5;
         vpos = position 
-          + vec3(dx*dx,0,dz)
+          + vec3(dx,0,dz)
           +
           vec3(0,position.y/12.0-sin(time*1.4)*0.007,position.z/12.0+sin(time*3.0)*0.01);
         gl_Position = projection * view * model * vec4(vpos,1);
@@ -55,7 +56,7 @@ function makesphere (regl) {
     uniforms: {
       model: function () {
         mat4.identity(model)
-        mat4.scale(model, model, [1,3,1])
+        mat4.scale(model, model, [1,3.5,1])
         //mat4.translate(model, model, [-32,-32,-32])
         return model
       },
