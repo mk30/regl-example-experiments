@@ -11,7 +11,7 @@ var snoise = fs.readFileSync(require.resolve('glsl-noise/simplex/3d.glsl'),'utf8
 var cnoise = fs.readFileSync(require.resolve('glsl-curl-noise/curl.glsl'),'utf8')
 
 function makesphere (regl) {
-  var sphere = spheremesh(20,0.25)
+  var sphere = spheremesh(20,0.5)
   var model = []
   return regl({
     frag: `
@@ -34,14 +34,13 @@ function makesphere (regl) {
       void main () {
         vnorm = normal;
         float h = min(
-          pow(abs(((position.y/0.25)-1.0)*0.5),5.0),
-          0.8
+          pow(abs(((position.y/0.5)-1.0)*0.5),5.0),
+          0.5
         );
-        float dx = snoise(position+sin(time-h))*h;
+        float dx = snoise(3.0*position+sin(0.5*time-h))*h;
         float dz = snoise(position+vec3(0,0,sin(time*h/2.0)));
-        float dy = snoise(vec3(sin(time), sin(time),
-        sin(time)));
-        vpos = position + vec3(dx,0,dx);
+        float dy = snoise(vec3(sin(time), sin(time), sin(time)));
+        vpos = position + vec3(dx*dx,0,dx);
         gl_Position = projection * view * model * vec4(vpos,1);
       }
     `,
