@@ -17,10 +17,11 @@ function makesphere (regl) {
     frag: `
       precision mediump float;
       varying vec3 vpos, vnorm;
+      ${snoise}
+      ${cnoise}
       void main () {
-        float l = max(dot(vec3(0.2,1,-0.3),vnorm)*0.8,
-          dot(vec3(-0.3,-1,-0.2),vnorm)*0.05);
-        gl_FragColor = vec4(l,l,l,1);
+        float c = snoise(curlNoise(vpos));
+        gl_FragColor = vec4(sqrt(vec3(1,0.8,0.5)*(c+1.0)),0.5);
       }
     `,
     vert: `
@@ -32,8 +33,15 @@ function makesphere (regl) {
       ${snoise}
       void main () {
         vnorm = normal;
-        float dy = snoise(position+time*0.25);
-        vpos = position + vec3(0,dy,0);
+        float h = min(
+          pow(abs(((position.y/0.25)-1.0)*0.5),5.0),
+          0.8
+        );
+        float dx = snoise(position+sin(time-h))*h;
+        float dz = snoise(position+vec3(0,0,sin(time*h/2.0)));
+        float dy = snoise(vec3(sin(time), sin(time),
+        sin(time)));
+        vpos = position + vec3(dx,0,dx);
         gl_Position = projection * view * model * vec4(vpos,1);
       }
     `,
@@ -43,7 +51,10 @@ function makesphere (regl) {
     },
     uniforms: {
       model: function () {
-        return mat4.identity(model)
+        mat4.identity(model)
+        mat4.scale(model, model, [1,3,1])
+        //mat4.translate(model, model, [-32,-32,-32])
+        return model
       },
       time: regl.context('time')
     },
