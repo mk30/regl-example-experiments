@@ -40,7 +40,10 @@ function makesphere (regl) {
         float dx = snoise(3.0*position+sin(0.5*time-h))*h;
         float dz = snoise(position+vec3(0,0,sin(time*h/2.0)));
         float dy = snoise(vec3(sin(time), sin(time), sin(time)));
-        vpos = position + vec3(dx*dx,0,dx);
+        vpos = position 
+          + vec3(dx*dx,0,dx)
+          +
+          vec3(0,position.y/12.0-sin(time*1.4)*0.007,position.z/12.0+sin(time*3.0)*0.01);
         gl_Position = projection * view * model * vec4(vpos,1);
       }
     `,
