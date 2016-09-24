@@ -5,13 +5,13 @@ var camera = require('regl-camera')(regl, {
 })
 var anormals = require('angle-normals')
 var mat4 = require('gl-mat4')
-var spheremesh = require('sphere-mesh')
+var icosphere = require('icosphere')
 var fs = require('fs')
 var snoise = fs.readFileSync(require.resolve('glsl-noise/simplex/3d.glsl'),'utf8')
 var cnoise = fs.readFileSync(require.resolve('glsl-curl-noise/curl.glsl'),'utf8')
 
 function makesphere (regl) {
-  var sphere = spheremesh(20,0.5)
+  var sphere = icosphere(4)
   var model = []
   return regl({
     frag: `
@@ -21,9 +21,15 @@ function makesphere (regl) {
       ${cnoise}
       void main () {
         float c = snoise(curlNoise(vpos));
-        if (vpos.x*vpos.x + vpos.y*vpos.y + vpos.z*vpos.z -
-        0.25 < 0.0){
-          gl_FragColor = vec4(sqrt(vec3(1,0.3,0.5)*(c-1.0)),0.8);
+        float y = vpos.y*5.0-1.5;
+        float x = vpos.x/2.0;
+        float z = vpos.z*1.75+1.1;
+        float e = x*x 
+          + y*y
+          + z*z 
+          - 0.25; 
+        if (e < 0.0){
+          gl_FragColor = vec4(sqrt(vec3(0,0,0)),1.0);
         }
         else gl_FragColor = vec4(sqrt(vec3(1,0.8,0.5)*(c+1.0)),0.5);
       }
@@ -33,24 +39,24 @@ function makesphere (regl) {
       uniform mat4 projection, view, model;
       uniform float time;
       attribute vec3 position, normal;
-      varying vec3 vnorm, vpos;
+      varying vec3 vnorm, vpos, dvpos;
       ${snoise}
       void main () {
         vnorm = normal;
         float h = min(
           pow(abs(((position.y/0.5)-1.0)*0.5),5.0),
-          0.5
+          0.6
         );
         float dx =
-        snoise(position+sin(0.2*time-0.3*h))*h*1.5;
-        float dy = snoise(position+vec3(0,0,sin(time*h/2.0)));
+        snoise(position+sin(0.2*time-h))*h;
         float dz =
-        snoise(3.0*position+cos(0.2*time-0.5*h))*h*1.5;
-        vpos = position 
+        snoise(position+cos(0.2*time-h))*h;
+        vpos = position;
+        dvpos = position
           + vec3(dx,0,dz)
-          +
-          vec3(0,position.y/12.0-sin(time*1.4)*0.007,position.z/12.0+sin(time*3.0)*0.01);
-        gl_Position = projection * view * model * vec4(vpos,1);
+          + vec3(0,position.y/12.0-sin(time*1.4)*0.007,position.z/12.0
+          + sin(time*3.0)*0.01);
+        gl_Position = projection * view * model * vec4(dvpos,1);
       }
     `,
     attributes: {
@@ -60,7 +66,7 @@ function makesphere (regl) {
     uniforms: {
       model: function () {
         mat4.identity(model)
-        mat4.scale(model, model, [1,3.5,1])
+        mat4.scale(model, model, [1,2,1])
         //mat4.translate(model, model, [-32,-32,-32])
         return model
       },
