@@ -21,9 +21,9 @@ function makesphere (regl) {
       ${cnoise}
       void main () {
         float c = snoise(curlNoise(vpos));
-        float y = vpos.y*5.0-1.5;
-        float x = vpos.x/2.0;
-        float z = vpos.z*1.75+1.1;
+        float y = vpos.y*5.0-2.0;
+        float x = vpos.x/3.0;
+        float z = vpos.z*2.2+1.4;
         float e = x*x 
           + y*y
           + z*z 
