@@ -20,7 +20,7 @@ function makesphere (regl) {
       ${snoise}
       ${cnoise}
       void main () {
-        float c = snoise(curlNoise(vpos));
+        float c = snoise(curlNoise(sin(vpos)));
         float y = vpos.y*5.0-2.0;
         float x = vpos.x/3.0;
         float z = vpos.z*2.2+1.4;
@@ -31,7 +31,7 @@ function makesphere (regl) {
         if (e < 0.0){
           gl_FragColor = vec4(sqrt(vec3(0,0,0)),1.0);
         }
-        else gl_FragColor = vec4(sqrt(vec3(1,0.8,0.5)*(c+1.0)),0.5);
+        else gl_FragColor = vec4(sqrt(vec3(1,0.8,0.5)*(c+0.5)),0.5);
       }
     `,
     vert: `
@@ -44,18 +44,18 @@ function makesphere (regl) {
       void main () {
         vnorm = normal;
         float h = min(
-          pow(abs(((position.y/0.5)-1.0)*0.5),5.0),
-          0.6
+          pow(abs(((position.y/0.5)-1.0)*0.5),3.0),
+          0.9
         );
         float dx =
         snoise(position+sin(0.2*time-h))*h;
         float dz =
-        snoise(position+cos(0.2*time-h))*h;
+        snoise(position+cos(0.3*time-h))*h;
         vpos = position;
         dvpos = position
           + vec3(dx,0,dz)
           + vec3(0,position.y/12.0-sin(time*1.4)*0.007,position.z/12.0
-          + sin(time*3.0)*0.01);
+          + sin(time)*0.1);
         gl_Position = projection * view * model * vec4(dvpos,1);
       }
     `,
@@ -66,7 +66,7 @@ function makesphere (regl) {
     uniforms: {
       model: function () {
         mat4.identity(model)
-        mat4.scale(model, model, [1,2,1])
+        mat4.scale(model, model, [0.5,1.5,0.5])
         //mat4.translate(model, model, [-32,-32,-32])
         return model
       },
@@ -93,11 +93,3 @@ regl.frame(function () {
     draw.sphere()
   })
 })
-
-
-
-
-
-
-
-
