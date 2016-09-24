@@ -20,14 +20,17 @@ function makesphere (regl) {
       ${snoise}
       ${cnoise}
       void main () {
-        float c = snoise(curlNoise(sin(vpos)));
-        float y = vpos.y*10.0-5.6;
+        float c = snoise(curlNoise(sin(vpos+1.0)));
+        float y = vpos.y*11.0-7.6;
         float x = vpos.x/25.0;
         float z = vpos.z*14.0+9.0;
-        float e = x*x*x
-          + y*y*y
+        float e = x*x
+          + y*y
           + z*z
-          - 0.25; 
+          +z*z*z*z
+          +z*z*x*x
+          +x*x
+          - 0.1; 
         if (e < 0.0){
           gl_FragColor = vec4(sqrt(vec3(0,0,0)),1.0);
         }
