@@ -11,6 +11,11 @@ var fs = require('fs')
 var snoise = fs.readFileSync(require.resolve('glsl-noise/simplex/3d.glsl'),'utf8')
 var cnoise = fs.readFileSync(require.resolve('glsl-curl-noise/curl.glsl'),'utf8')
 
+const feedBackTexture = regl.texture({
+  copy: true,
+  min: 'linear',
+  mag: 'linear'
+})
 function makesphere (regl) {
   var sphere = icosphere(4)
   var model = []
@@ -36,7 +41,7 @@ function makesphere (regl) {
           gl_FragColor = vec4(sqrt(vec3(0,0,0)),1.0);
         }
         else gl_FragColor =
-        vec4(sqrt(vec3(1,0.8,0.3)*(c+0.7)),0.7);
+        vec4(sqrt(vec3(1,0.8,0.3)*(c+0.7)),0.9);
       }
     `,
     vert: `
@@ -69,6 +74,7 @@ function makesphere (regl) {
       normal: anormals(sphere.cells, sphere.positions)
     },
     uniforms: {
+      texture: feedBackTexture,
       model: function () {
         mat4.identity(model)
         mat4.scale(model, model, [0.5,1.5,0.5])
@@ -87,6 +93,40 @@ function makesphere (regl) {
     elements: sphere.cells
   })
 }
+const drawFeedback = regl({
+  frag: `
+  precision mediump float;
+  uniform sampler2D texture;
+  uniform float t;
+  varying vec2 uv;
+  void main () {
+    vec2 warp = uv + 0.01 * sin(t) * vec2(0.5 - uv.y, uv.x - 0.5)
+      - 0.01 * (uv - 0.5);
+    gl_FragColor = vec4(0.98 * texture2D(texture, warp).rgb, 1);
+  }`,
+
+  vert: `
+  precision mediump float;
+  attribute vec2 position;
+  varying vec2 uv;
+  void main () {
+    uv = position;
+    gl_Position = vec4(2.0 * position - 1.0, 0, 1);
+  }`,
+
+  attributes: {
+    position: [-2, 0, 0, -2, 2, 2]
+  },
+
+  uniforms: {
+    texture: feedBackTexture,
+    t: ({tick}) => 0.001 * tick
+  },
+
+  depth: {enable: false},
+
+  count: 3
+})
 
 var draw = {
   sphere: makesphere(regl)
@@ -95,6 +135,13 @@ var draw = {
 regl.frame(function () {
   regl.clear({ color: [0,0,0,1], depth: true })
   camera(function () {
+    drawFeedback()
     draw.sphere()
+    feedBackTexture({
+      copy: true,
+      min: 'linear',
+      mag: 'linear'
+    })
+
   })
 })
