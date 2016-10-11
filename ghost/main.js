@@ -7,9 +7,7 @@ var camera = require('regl-camera')(regl, {
 var anormals = require('angle-normals')
 var mat4 = require('gl-mat4')
 var icosphere = require('icosphere')
-var fs = require('fs')
-var snoise = fs.readFileSync(require.resolve('glsl-noise/simplex/3d.glsl'),'utf8')
-var cnoise = fs.readFileSync(require.resolve('glsl-curl-noise/curl.glsl'),'utf8')
+var glsl = require('glslify')
 
 const feedBackTexture = regl.texture({
   copy: true,
@@ -20,13 +18,13 @@ function makesphere (regl) {
   var sphere = icosphere(4)
   var model = []
   return regl({
-    frag: `
+    frag: glsl`
       precision mediump float;
+      #pragma glslify: snoise = require('glsl-noise/simplex/3d')
+      #pragma glslify: cnoise = require('glsl-curl-noise')
       varying vec3 vpos, vnorm;
-      ${snoise}
-      ${cnoise}
       void main () {
-        float c = snoise(curlNoise(sin(vpos+3.0)/2.0));
+        float c = snoise(cnoise(sin(vpos+3.0)/2.0));
         float y = vpos.y*11.0-7.6;
         float x = vpos.x/25.0;
         float z = vpos.z*14.0+9.0;
@@ -44,13 +42,13 @@ function makesphere (regl) {
         vec4(sqrt(vec3(1,0.8,0.3)*(c+0.7)),0.9);
       }
     `,
-    vert: `
+    vert: glsl`
       precision mediump float;
+      #pragma glslify: snoise = require('glsl-noise/simplex/3d')
       uniform mat4 projection, view, model;
       uniform float time;
       attribute vec3 position, normal;
       varying vec3 vnorm, vpos, dvpos;
-      ${snoise}
       void main () {
         vnorm = normal;
         float h = min(
@@ -102,7 +100,7 @@ const drawFeedback = regl({
   void main () {
     vec2 warp = uv + 0.01 * sin(t) * vec2(0.5 - uv.y, uv.x - 0.5)
       - 0.01 * (uv - 0.5);
-    gl_FragColor = vec4(0.98 * texture2D(texture, warp).rgb, 1);
+    gl_FragColor = vec4(0.94 * texture2D(texture, warp).rgb, 1);
   }`,
 
   vert: `
