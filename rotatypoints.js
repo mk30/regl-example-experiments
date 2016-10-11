@@ -2,23 +2,24 @@ const regl = require('../regl')()
 const mat4 = require('gl-mat4')
 var rmat = []
 
-const dis = require('./bits/displacementmodule.js')
+const cone = require('./bits/rotatypointmodule.js')
 const normals = require('angle-normals')
 
 const camera = require('./bits/camera.js')(regl, {
   center: [0, 2.5, 0]
 })
 
-const drawdis = regl({
+const drawCone = regl({
   frag: `
     precision mediump float;
     varying vec3 vnormal;
     vec3 hsl2rgb(vec3 hsl) {
-      vec3 rgb = clamp( abs(mod(hsl.x*5.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
-      return hsl.z - hsl.y * (rgb-0.5)*(3.0-abs(2.0*hsl.y-1.0));
+      vec3 rgb = clamp(
+      abs(mod(hsl.x*2.0+vec3(0.0,4.0,2.0)-hsl.z*5.0,6.0)-3.0)-1.0, 0.0, 1.0 );
+      return hsl.z - hsl.y * (rgb-0.5)*(10.0-abs(2.0*hsl.y-1.0));
     }
     void main () {
-      gl_FragColor = vec4(hsl2rgb(abs(vnormal)), 1.0);
+      gl_FragColor = vec4(hsl2rgb(abs(vnormal)).xz, 0.5, 1.0);
     }`,
   vert: `
     precision mediump float;
@@ -27,39 +28,40 @@ const drawdis = regl({
     varying vec3 vnormal;
     uniform float t;
     vec3 warp (vec3 p){
-      float r = length(p.zx*sin(t*p.yz));
-      float theta = atan(p.z, p.x);
-      return vec3 (r*cos(theta), p.x*theta+r, r*sin(theta));
+      float r = length(p.yz);
+      float theta = atan(p.y, p.z);
+      return vec3 (r*cos(theta), p.y, r*sin(theta*10.0)) +
+      vnormal*(1.0+cos(10.0*t*r-p.y));
     }
     void main () {
       vnormal = normal;
       gl_Position = projection * view * model * vec4(warp(position), 1.0);
       gl_PointSize =
-      (64.0*(1.0+sin(t*20.0+length(position))))/gl_Position.w;
+      (100.0*(1.0+sin(t*20.0+length(position))))/gl_Position.w;
     }`,
   attributes: {
-    position: dis.positions,
-    normal: normals(dis.cells, dis.positions)
+    position: cone.positions,
+    normal: normals(cone.cells, cone.positions)
   },
-  elements: dis.cells,
+  elements: cone.cells,
   uniforms: {
     t: function(context, props){
          return context.tick/1000
        },
     model: function(context, props){
       var theta = context.tick/60
-      return mat4.rotateY(rmat, mat4.identity(rmat), theta)
+      return mat4.rotateX(rmat, mat4.identity(rmat), theta)
     }
     
   },
-  primitive: "triangles"
+  primitive: "points"
 })
-
-
 
 regl.frame(() => {
   regl.clear({
     color: [0, 0, 0, 1]
   })
-  camera(() => { drawdis() })
+  camera(() => {
+    drawCone()
+  })
 })

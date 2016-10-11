@@ -2,7 +2,7 @@ const regl = require('../regl')()
 const mat4 = require('gl-mat4')
 var rmat = []
 
-const dis = require('./bits/icecreamdripmodule.js')
+const dis = require('./bits/jellydisplace.js')
 const normals = require('angle-normals')
 
 const camera = require('./bits/camera')(regl, {
