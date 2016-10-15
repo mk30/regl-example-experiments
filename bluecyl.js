@@ -1,15 +1,12 @@
 const regl = require('../regl')()
 const mat4 = require('gl-mat4')
 var rmat = []
-
-const bunny = require('./bits/implicitcyl.js')
+const cyl = require('./bits/implicitcyl.js')
 const normals = require('angle-normals')
-
 const camera = require('./bits/camera.js')(regl, {
   center: [0, 2.5, 0]
 })
-
-const drawBunny = regl({
+const drawcyl = regl({
   frag: `
     precision mediump float;
     varying vec3 vnormal;
@@ -39,10 +36,10 @@ const drawBunny = regl({
       (64.0*(1.0+sin(t*20.0+length(position))))/gl_Position.w;
     }`,
   attributes: {
-    position: bunny.positions,
-    normal: normals(bunny.cells, bunny.positions)
+    position: cyl.positions,
+    normal: normals(cyl.cells, cyl.positions)
   },
-  elements: bunny.cells,
+  elements: cyl.cells,
   uniforms: {
     t: function(context, props){
          return context.tick/1000
@@ -51,17 +48,14 @@ const drawBunny = regl({
       var theta = context.tick/60
       return mat4.rotateY(rmat, mat4.identity(rmat), theta)
     }
-    
   },
-
   primitive: "line loop"
 })
-
 regl.frame(() => {
   regl.clear({
     color: [0, 0, 0, 1]
   })
   camera(() => {
-    drawBunny()
+    drawcyl()
   })
 })

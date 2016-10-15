@@ -73,7 +73,6 @@ const drawcyl = regl({
   },
   primitive: "points"
 })
-
 regl.frame(() => {
   regl.clear({ color: [0, 0, 0, 1] })
   drawfeedback({texture: feedBackTexture})
