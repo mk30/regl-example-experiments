@@ -6,7 +6,9 @@ const cyl = require('./bits/implicitcyl.js')
 const normals = require('angle-normals')
 
 const camera = require('./bits/camera.js')(regl, {
-  center: [0, 2.5, 0]
+  center: [0, -1, 0],
+  distance: 15,
+  phi: 0.4 
 })
 const drawBunny = regl({
   frag: `

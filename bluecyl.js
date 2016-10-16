@@ -4,7 +4,7 @@ var rmat = []
 const cyl = require('./bits/implicitcyl.js')
 const normals = require('angle-normals')
 const camera = require('./bits/camera.js')(regl, {
-  center: [0, 2.5, 0]
+  center: [0, 0, 0]
 })
 const drawcyl = regl({
   frag: `

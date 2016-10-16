@@ -2,18 +2,21 @@ var regl = require('regl')()
 var camera = require('regl-camera')(regl, {
   center: [0,0,0],
   distance: 5,
-  theta: -1.5 
+  phi: 0.5,
+  theta: 1.5
 })
 var anormals = require('angle-normals')
 var mat4 = require('gl-mat4')
 var icosphere = require('icosphere')
 var glsl = require('glslify')
 
-const feedBackTexture = regl.texture({
-  copy: true,
-  min: 'linear',
-  mag: 'linear'
-})
+var feedback = require('../bits/feedbackeffect.js')
+var drawfeedback = feedback(regl, `
+  vec3 sample (vec2 uv, sampler2D tex) {
+    return 0.95*texture2D(tex, (0.99*(2.0*uv-1.0)+1.0)*0.5).rgb;
+  }
+`)
+const feedBackTexture = regl.texture({})
 function makesphere (regl) {
   var sphere = icosphere(4)
   var model = []
@@ -39,7 +42,7 @@ function makesphere (regl) {
           gl_FragColor = vec4(sqrt(vec3(0,0,0)),1.0);
         }
         else gl_FragColor =
-        vec4(sqrt(vec3(1,0.8,0.3)*(c+0.7)),0.9);
+        vec4(sqrt(vec3(1,0.8,0.3)*(c+0.7)),0.1);
       }
     `,
     vert: glsl`
@@ -76,7 +79,6 @@ function makesphere (regl) {
       model: function () {
         mat4.identity(model)
         mat4.scale(model, model, [0.5,1.5,0.5])
-        //mat4.translate(model, model, [-32,-32,-32])
         return model
       },
       time: regl.context('time')
@@ -88,58 +90,24 @@ function makesphere (regl) {
         dst: 'one minus src alpha'
       }
     },
+    cull: {
+      enable: true
+    },
     elements: sphere.cells
   })
 }
-const drawFeedback = regl({
-  frag: `
-  precision mediump float;
-  uniform sampler2D texture;
-  uniform float t;
-  varying vec2 uv;
-  void main () {
-    vec2 warp = uv + 0.01 * sin(t) * vec2(0.5 - uv.y, uv.x - 0.5)
-      - 0.01 * (uv - 0.5);
-    gl_FragColor = vec4(0.94 * texture2D(texture, warp).rgb, 1);
-  }`,
-
-  vert: `
-  precision mediump float;
-  attribute vec2 position;
-  varying vec2 uv;
-  void main () {
-    uv = position;
-    gl_Position = vec4(2.0 * position - 1.0, 0, 1);
-  }`,
-
-  attributes: {
-    position: [-2, 0, 0, -2, 2, 2]
-  },
-
-  uniforms: {
-    texture: feedBackTexture,
-    t: ({tick}) => 0.001 * tick
-  },
-
-  depth: {enable: false},
-
-  count: 3
-})
-
 var draw = {
   sphere: makesphere(regl)
 }
-
 regl.frame(function () {
   regl.clear({ color: [0,0,0,1], depth: true })
+  drawfeedback({texture: feedBackTexture})    //**
   camera(function () {
-    drawFeedback()
     draw.sphere()
-    feedBackTexture({
+    feedBackTexture({    //**
       copy: true,
       min: 'linear',
       mag: 'linear'
     })
-
   })
 })
