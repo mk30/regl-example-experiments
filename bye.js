@@ -1,6 +1,6 @@
 //takes an exported draw function and plops it into the
 //camera. this file gets browserified.
-const regl = require('../regl')()
+const regl = require('regl')()
 const mat4 = require('gl-mat4')
 const mod = require('./bits/butterflywingmodule.js')(regl)
 const camera = require('./bits/camera.js')(regl, {

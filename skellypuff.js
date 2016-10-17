@@ -1,4 +1,4 @@
-const regl = require('../regl')()
+const regl = require('regl')()
 const mat4 = require('gl-mat4')
 var rmat = []
 
@@ -6,7 +6,8 @@ const skelly = require('./bits/skelly.json')
 const normals = require('angle-normals')
 
 const camera = require('./bits/camera.js')(regl, {
-  center: [0, 2.5, 0]
+  center: [0, 10, 0],
+  distance: 10
 })
 
 const drawskelly = regl({

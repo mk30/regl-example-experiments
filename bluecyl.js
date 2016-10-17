@@ -1,4 +1,4 @@
-const regl = require('../regl')()
+const regl = require('regl')()
 const mat4 = require('gl-mat4')
 var rmat = []
 const cyl = require('./bits/implicitcyl.js')
