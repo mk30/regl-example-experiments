@@ -1,12 +1,11 @@
-const regl = require('../../regl')()
+const regl = require('regl')()
 const mat4 = require('gl-mat4')
 var rmat = []
-
-const dis = require('../bits/icecreamdripmodule.js')
+const dis = require('../bits/jellydisplace.js')
 const normals = require('angle-normals')
-
 const camera = require('../bits/camera')(regl, {
-  center: [0, 2.5, 0]
+  center: [0, 0, 0],
+  distance: 20,
 })
 var glsl = require('glslify')
 
@@ -29,25 +28,22 @@ const drawdis = regl({
     varying vec3 vnorm, vpos, dvpos;
     uniform float t;
     vec3 warp (vec3 p){
-      float r = length(p.zx*sin(t*p.yz));
+      float r = length(p.x*sin(t));
       float theta = atan(p.z, p.x);
-      return vec3 (r*cos(theta), p.x*theta, r*sin(theta));
+      return vec3 (r*cos(r), 2.0+sin(theta-r), r*sin(theta+t));
     }
     void main () {
       vnorm = normal;
       float h = min(
-        pow(abs(((position.y/0.5)-1.0)*0.5),3.0),
-        0.9
+        pow(abs(((position.y)-1.0)*0.5),5.0),
+        0.1
       );
       float dx =
-      snoise(position+sin(0.2*t-h))*h;
+      snoise(position+sin(t))*h;
       float dz =
-      snoise(position+cos(0.3*t-h))*h;
+      snoise(position+cos(t))*h;
       vpos = position;
-      dvpos = position
-        + vec3(dx,0,dz)
-        + vec3(0,position.y/12.0-sin(t*1.4)*0.007,position.z/12.0
-        + sin(t)*0.1);
+      dvpos = position + vec3(dx,0,dz);
       gl_Position = projection * view * model * vec4(warp(dvpos),1);
     }`,
   attributes: {
@@ -57,18 +53,22 @@ const drawdis = regl({
   elements: dis.cells,
   uniforms: {
     t: function(context, props){
-         return context.tick/1000
+         return context.time + props.offset
        },
     model: function(context, props){
-      var theta = context.tick/60
-      return mat4.rotateY(rmat, mat4.identity(rmat), theta)
+      var theta = context.time
+      return mat4.rotateZ(rmat, mat4.identity(rmat), props.foo)
     }
   },
-  primitive: "triangles"
+  primitive: "lines"
 })
-regl.frame(() => {
+regl.frame((context) => {
   regl.clear({
     color: [0, 0, 0, 1]
   })
-  camera(() => { drawdis() })
+  var batch = []
+  for (var i=0; i<20; i++){
+    batch.push({foo: i/20*Math.PI, offset: i/20})
+  }
+  camera(() => { drawdis(batch) })
 })
