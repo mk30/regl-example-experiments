@@ -57,8 +57,8 @@ const drawdis = regl({
        },
     model: function(context, props){
       var theta = context.tick/60
-      //return mat4.rotateX(rmat, mat4.identity(rmat), theta)
-      return mat4.identity(rmat)
+      return mat4.rotateY(rmat, mat4.identity(rmat), 1.5)
+      //return mat4.identity(rmat)
     }
   },
   primitive: "triangles"
