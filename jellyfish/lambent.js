@@ -75,20 +75,16 @@ function wings (regl){
       varying vec3 vnorm, vpos, dvpos;
       uniform float t;
       vec3 warp (vec3 p){
-        float r = length(p.x*sin(t*p.yz));
+        float r = length(p.x*sin(p.yz));
         float theta = atan(p.z, p.x);
         return vec3 (r*cos(theta), p.y*r*0.5, p.z*sin(theta));
       }
       void main () {
         vnorm = normal;
-        float h = min(
-          pow(abs(((position.y)-1.0)*0.5),6.0),
-          0.2
-        );
         float dx =
-        snoise(position+sin(t))*h;
+        snoise(position+sin(t));
         float dz =
-        snoise(position+cos(t))*h;
+        snoise(position+cos(t));
         vpos = position;
         dvpos = position + vec3(dx,0,dz);
         gl_Position = projection * view * model * vec4(warp(dvpos),1);
@@ -119,7 +115,6 @@ var draw = {
   woman: woman(regl),
   wings: wings(regl)
 }
-
 
 regl.frame(() => {
   regl.clear({
