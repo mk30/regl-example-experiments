@@ -4,8 +4,8 @@ const glsl = require('glslify')
 const normals = require('angle-normals')
 
 const camera = require('regl-camera')(regl, {
-  center: [0, 2.5, 0],
-  distance: 5 
+  center: [0, 3, 0],
+  distance: 6 
 })
 
 function woman (regl){
@@ -15,8 +15,13 @@ function woman (regl){
     frag: `
       precision mediump float;
       varying vec3 vnormal;
+      vec3 hsl2rgb(vec3 hsl) {
+        vec3 rgb = clamp( abs(mod(hsl.x*5.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
+        return hsl.z - hsl.y * (rgb)*(10.0-abs(2.0*hsl.y-1.0));
+      }
+
       void main () {
-        gl_FragColor = vec4(vnormal, 1.0);
+        gl_FragColor = vec4(hsl2rgb(abs(vnormal)), 1.0);
       }`,
     vert: `
       precision mediump float;
@@ -40,20 +45,16 @@ function woman (regl){
       t: function(context, props){
            return context.tick/1000
          },
-      model: mat4.identity([]),
-      /*
       model: function(context, props){
         var theta = context.tick/60
-
-        return mat4.rotateY(rmat, mat4.identity(rmat), theta)
+        return mat4.rotateY(rmat, mat4.identity(rmat), 1.2)
       }
-      */
     },
-    primitive: "points"
+    primitive: "triangles"
   })
 }
 function wings (regl){
-  var rmat = []
+  var model = []
   var mesh = require('../bits/jellydisplace.js')
   return regl({
     frag: `
@@ -61,7 +62,7 @@ function wings (regl){
       varying vec3 vnorm;
       vec3 hsl2rgb(vec3 hsl) {
         vec3 rgb = clamp( abs(mod(hsl.x*5.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
-        return hsl.z - hsl.y * (rgb-0.5)*(3.0-abs(2.0*hsl.y-1.0));
+        return hsl.z - hsl.y * (rgb)*(10.0-abs(2.0*hsl.y-1.0));
       }
       void main () {
         gl_FragColor = vec4(hsl2rgb(abs(vnorm)), 1.0);
@@ -103,8 +104,11 @@ function wings (regl){
          },
       model: function(context, props){
         var theta = context.tick/60
-        return mat4.rotateY(rmat, mat4.identity(rmat), 1.5)
-        //return mat4.identity(rmat)
+        mat4.identity(model)
+        mat4.scale(model, model, [0.25, 0.2, 0.25])
+        mat4.rotateY(model, model, 1.5) 
+        mat4.translate(model, model, [0,10,-5])
+        return model
       }
     },
     primitive: "triangles"
