@@ -5,7 +5,9 @@ const normals = require('angle-normals')
 
 const camera = require('regl-camera')(regl, {
   center: [0, 20, 0],
-  distance: 50 
+  distance: 50,
+  theta: 1,
+  delta: -.05
 })
 
 function woman (regl){
@@ -15,13 +17,8 @@ function woman (regl){
     frag: `
       precision mediump float;
       varying vec3 vnormal;
-      vec3 hsl2rgb(vec3 hsl) {
-        vec3 rgb = clamp( abs(mod(hsl.x*5.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
-        return hsl.z - hsl.y * (rgb)*(10.0-abs(2.0*hsl.y-1.0));
-      }
-
       void main () {
-        gl_FragColor = vec4(hsl2rgb(abs(vnormal)), 1.0);
+        gl_FragColor = vec4(abs(vnormal), 1.0);
       }`,
     vert: `
       precision mediump float;
@@ -33,8 +30,6 @@ function woman (regl){
         vnormal = normal;
         gl_Position = projection * view * model *
         vec4(position, 1.0);
-        gl_PointSize =
-        (64.0*(1.0+sin(t*20.0+length(position))))/gl_Position.w;
       }`,
     attributes: {
       position: mesh.positions,
@@ -48,7 +43,7 @@ function woman (regl){
       model: function(context, props){
         var theta = context.tick/60
         mat4.identity(model)
-        mat4.scale(model, model, [0.01, 0.01, 0.01])
+        mat4.scale(model, model, [0.01, 0.01, 0.015])
         //mat4.rotateY(model, model, 1.5) 
         return model
       }
@@ -63,12 +58,8 @@ function wings (regl){
     frag: `
       precision mediump float;
       varying vec3 vnorm;
-      vec3 hsl2rgb(vec3 hsl) {
-        vec3 rgb = clamp( abs(mod(hsl.x*5.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0 );
-        return hsl.z - hsl.y * (rgb)*(10.0-abs(2.0*hsl.y-1.0));
-      }
       void main () {
-        gl_FragColor = vec4(hsl2rgb(abs(vnorm)), 1.0);
+        gl_FragColor = vec4(abs(vnorm), 1.0);
       }`,
     vert: glsl`
       precision mediump float;
@@ -85,9 +76,9 @@ function wings (regl){
       void main () {
         vnorm = normal;
         float dx =
-        snoise(position+sin(t));
+        snoise(position+sin(t-position));
         float dz =
-        snoise(position+cos(t));
+        snoise(position+cos(t-position));
         vpos = position;
         dvpos = position + vec3(dx,0,dz);
         gl_Position = projection * view * model * vec4(warp(dvpos),1);
@@ -110,7 +101,7 @@ function wings (regl){
         return model
       }
     },
-    primitive: "lines"
+    primitive: "triangles"
   })
 }
 
