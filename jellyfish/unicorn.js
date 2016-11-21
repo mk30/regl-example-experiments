@@ -6,30 +6,43 @@ const normals = require('angle-normals')
 const camera = require('regl-camera')(regl, {
   center: [0, 20, 0],
   distance: 50,
-  theta: 1,
-  delta: -.05
+  theta: 1
 })
 
-function woman (regl){
+function unicorn (regl){
   var model = []
+  var colormod = []
   var mesh = require('./unicorn.json')
   return regl({
     frag: `
       precision mediump float;
-      varying vec3 vnormal;
+      varying vec3 vnormal, vpos;
+      varying float vtime;
+      vec3 hsl2rgb(in vec3 hsl) {
+        vec3 rgb = clamp(abs(mod(hsl.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0,0.0,1.0);
+        return hsl.z+hsl.y*(rgb-0.5)*(1.0-abs(2.0*hsl.z-1.0));
+      }
       void main () {
-        gl_FragColor = vec4(abs(vnormal), 1.0);
+        vec3 c = abs(vnormal) * 0.3
+          + vec3(10.0*sin(vtime - vpos.z/10.0 +
+          vpos.y/200.0),1,1) * 0.4
+        ;
+        c.y = 1.0;
+        gl_FragColor = vec4(hsl2rgb(c), 1.0);
       }`,
     vert: `
       precision mediump float;
       uniform mat4 model, projection, view;
-      attribute vec3 position, normal;
-      varying vec3 vnormal;
       uniform float t;
+      attribute vec3 position, normal;
+      varying vec3 vnormal, vpos;
+      varying float vtime;
       void main () {
         vnormal = normal;
+        vtime = t;
         gl_Position = projection * view * model *
         vec4(position, 1.0);
+        vpos = vec3(gl_Position);
       }`,
     attributes: {
       position: mesh.positions,
@@ -39,7 +52,7 @@ function woman (regl){
     uniforms: {
       t: function(context, props){
            return context.tick/1000
-         },
+      },
       model: function(context, props){
         var theta = context.tick/60
         mat4.identity(model)
@@ -106,7 +119,7 @@ function wings (regl){
 }
 
 var draw = {
-  woman: woman(regl),
+  unicorn: unicorn(regl),
   wings: wings(regl)
 }
 
@@ -115,7 +128,7 @@ regl.frame(() => {
     color: [0, 0, 0, 1]
   })
   camera(() => {
-    draw.woman()
+    draw.unicorn()
     draw.wings()
   })
 })
