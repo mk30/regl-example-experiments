@@ -11,7 +11,7 @@ const camera = require('regl-camera')(regl, {
 })
 
 function unicorn (regl){
-  var model = [], vtmp = []
+  var model = []
   var mesh = require('./unicorn.json')
   return regl({
     frag: `
