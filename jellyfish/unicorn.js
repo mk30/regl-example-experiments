@@ -1,5 +1,6 @@
 const regl = require('regl')()
 const mat4 = require('gl-mat4')
+const vec3 = require('gl-vec3')
 const glsl = require('glslify')
 const normals = require('angle-normals')
 
@@ -10,8 +11,7 @@ const camera = require('regl-camera')(regl, {
 })
 
 function unicorn (regl){
-  var model = []
-  var colormod = []
+  var model = [], vtmp = []
   var mesh = require('./unicorn.json')
   return regl({
     frag: `
