@@ -12,7 +12,16 @@ const camera = require('regl-camera')(regl, {
 
 function unicorn (regl){
   var model = []
+
   var mesh = require('./unicorn.json')
+var cells = []; 
+for (var i = 0; i < mesh.cells.length; i++) { 
+  var c = mesh.cells[i]; 
+  for (var j = 2; j < c.length; j++) { 
+    cells.push([c[0],c[j-1],c[j]])
+  } 
+}
+mesh.cells = cells
   return regl({
     frag: `
       precision mediump float;
